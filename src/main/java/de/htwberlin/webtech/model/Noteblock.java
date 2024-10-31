@@ -1,4 +1,4 @@
-package model;
+package de.htwberlin.webtech.model;
 
 import java.time.LocalDateTime;
 import java.util.List;

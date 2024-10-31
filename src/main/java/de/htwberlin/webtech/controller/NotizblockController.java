@@ -1,6 +1,6 @@
-package controller;
+package de.htwberlin.webtech.controller;
 
-import model.Noteblock;
+import de.htwberlin.webtech.model.Noteblock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,13 @@ import java.util.Optional;
 public class NotizblockController {
 
     private List<Noteblock> noteblocks = new ArrayList<>();
+
+    public NotizblockController() {
+        // Demo data
+        noteblocks.add(new Noteblock("1", "Math Class Notes", "Review linear equations", LocalDateTime.now(), Arrays.asList("school", "math")));
+        noteblocks.add(new Noteblock("2", "Cake Recipe", "Ingredients: flour, sugar, eggs...", LocalDateTime.now(), Arrays.asList("cooking", "recipe")));
+        noteblocks.add(new Noteblock("3", "To-Do List", "1. Grocery shopping 2. Review project", LocalDateTime.now(), Arrays.asList("tasks", "personal")));
+    }
 
     @GetMapping
     public ResponseEntity<List<Noteblock>> getAllNoteblocks() {
