@@ -3,6 +3,7 @@ package de.htwberlin.webtech.service;
 
 import de.htwberlin.webtech.model.Noteblock;
 import de.htwberlin.webtech.repository.NoteblockRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,8 @@ import java.util.UUID;
 
 @Service
 public class NotizblockService {
+
+    @Autowired
     private final NoteblockRepository repository;
 
     public NotizblockService(NoteblockRepository repository) {

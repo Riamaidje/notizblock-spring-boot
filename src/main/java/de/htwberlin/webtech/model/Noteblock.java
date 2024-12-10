@@ -3,6 +3,10 @@ package de.htwberlin.webtech.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +14,9 @@ import java.util.UUID;
 
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
 public class Noteblock {
 
     @Id

@@ -36,6 +36,4 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-bootJar {
-	archiveFileName = 'noteblock-backend.jar' // Name des generierten JARs
-}
+
