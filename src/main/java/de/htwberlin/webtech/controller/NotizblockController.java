@@ -1,67 +1,66 @@
 package de.htwberlin.webtech.controller;
-
 import de.htwberlin.webtech.model.Noteblock;
+import de.htwberlin.webtech.service.NotizblockService;
+import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/notizblock")
 public class NotizblockController {
 
-    private List<Noteblock> noteblocks = new ArrayList<>();
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(NotizblockController.class);
+    private final NotizblockService service;
 
-    public NotizblockController() {
-        // Demo data
-        noteblocks.add(new Noteblock("1", "Math Class Notes", "Review linear equations", LocalDateTime.now(), Arrays.asList("school", "math")));
-        noteblocks.add(new Noteblock("2", "Cake Recipe", "Ingredients: flour, sugar, eggs...", LocalDateTime.now(), Arrays.asList("cooking", "recipe")));
-        noteblocks.add(new Noteblock("3", "To-Do List", "1. Grocery shopping 2. Review project", LocalDateTime.now(), Arrays.asList("tasks", "personal")));
+    public NotizblockController(NotizblockService service) {
+        this.service = service;
     }
 
     @GetMapping
     public ResponseEntity<List<Noteblock>> getAllNoteblocks() {
-        return ResponseEntity.ok(noteblocks);
+        List<Noteblock> notes = service.getAllNoteblocks();
+        logger.info("Retrieved {} notes", notes.size());
+        return ResponseEntity.ok(notes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Noteblock> getNoteblockById(@PathVariable String id) {
-        Optional<Noteblock> noteblock = noteblocks.stream()
-                .filter(n -> n.getId().equals(id))
-                .findFirst();
-        return noteblock.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ResponseEntity<Noteblock> getNoteblockById(@PathVariable UUID id) {
+        Optional<Noteblock> noteblock = service.getNoteblockById(id);
+        if (noteblock.isPresent()) {
+            return ResponseEntity.ok(noteblock.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Noteblock> createNoteblock(@RequestBody Noteblock noteblock) {
-        noteblock.setCreatedAt(LocalDateTime.now());
-        noteblock.setUpdatedAt(LocalDateTime.now());
-        noteblocks.add(noteblock);
-        return ResponseEntity.status(HttpStatus.CREATED).body(noteblock);
+    public ResponseEntity<Noteblock> createNoteblock(@Valid @RequestBody Noteblock noteblock) {
+        Noteblock savedNoteblock = service.createNoteblock(noteblock);
+        logger.info("Note created with ID: {}", savedNoteblock.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedNoteblock);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Noteblock> updateNoteblock(@PathVariable String id, @RequestBody Noteblock updatedNoteblock) {
-        for (Noteblock noteblock : noteblocks) {
-            if (noteblock.getId().equals(id)) {
-                noteblock.updateNote(updatedNoteblock.getTitle(), updatedNoteblock.getContent(), updatedNoteblock.getTags());
-                noteblock.setUpdatedAt(LocalDateTime.now());
-                return ResponseEntity.ok(noteblock);
-            }
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Noteblock> updateNoteblock(@PathVariable UUID id, @Valid @RequestBody Noteblock updatedNoteblock) {
+        Optional<Noteblock> updated = service.updateNoteblock(id, updatedNoteblock);
+        return updated.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNoteblock(@PathVariable String id) {
-        boolean removed = noteblocks.removeIf(noteblock -> noteblock.getId().equals(id));
-        return removed ? ResponseEntity.noContent().build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<?> deleteNoteblock(@PathVariable UUID id) {
+        boolean deleted = service.deleteNoteblock(id);
+        if (deleted) {
+            logger.info("Note deleted with ID: {}", id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found with ID: " + id);
+        }
     }
 }
