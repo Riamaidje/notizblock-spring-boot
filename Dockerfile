@@ -1,16 +1,15 @@
-FROM maven:3.8.6-openjdk-11 AS build
+# Stufe 1: Build-Phase
+FROM gradle:jdk21-jammy AS build
+COPY --chown=gradle:gradle . /home/gradle/src
+WORKDIR /home/gradle/src
 
-WORKDIR /app
-COPY . .
+# for all env-variables that we will use in the future:
+ARG DB_PASSWORD
+ARG DB_URL
+ARG DB_USER
+RUN gradle build --no-daemon
 
-RUN mvn clean package -DskipTests
-
-FROM openjdk:11-jre-slim
-
-WORKDIR /app
-
-COPY --from=build /app/target/noteblock-api-1.0.0.jar app.jar
-
-EXPOSE 8080
-
-CMD ["java", "-jar", "app.jar"]
+# Stufe 2: Ausführungsphase
+FROM eclipse-temurin:21-jdk-jammy
+COPY --from=build /home/gradle/src/build/libs/noteblock-backend-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
