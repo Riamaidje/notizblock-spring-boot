@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class NotizblockApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NotizblockApplication.class, args);
-	}
+
+	SpringApplication.run(NotizblockApplication.class, args);}
 
 }

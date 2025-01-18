@@ -2,6 +2,7 @@ package de.htwberlin.webtech.controller;
 import de.htwberlin.webtech.model.Noteblock;
 import de.htwberlin.webtech.service.NotizblockService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,15 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Controller
+@AllArgsConstructor
 @RequestMapping("/notizblock")
 public class NotizblockController {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(NotizblockController.class);
     private final NotizblockService service;
-
-    public NotizblockController(NotizblockService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public ResponseEntity<List<Noteblock>> getAllNoteblocks() {
@@ -31,11 +29,8 @@ public class NotizblockController {
     @GetMapping("/{id}")
     public ResponseEntity<Noteblock> getNoteblockById(@PathVariable UUID id) {
         Optional<Noteblock> noteblock = service.getNoteblockById(id);
-        if (noteblock.isPresent()) {
-            return ResponseEntity.ok(noteblock.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return noteblock.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @PostMapping
@@ -49,8 +44,7 @@ public class NotizblockController {
     public ResponseEntity<Noteblock> updateNoteblock(@PathVariable UUID id, @Valid @RequestBody Noteblock updatedNoteblock) {
         Optional<Noteblock> updated = service.updateNoteblock(id, updatedNoteblock);
         return updated.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null));
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @DeleteMapping("/{id}")
